@@ -1,0 +1,85 @@
+﻿<Page
+    x:Class="PersonalSprintPlanner.Views.SprintPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:components="using:PersonalSprintPlanner.Components"
+    xmlns:helpers="using:PersonalSprintPlanner.Helpers"
+    Style="{StaticResource PageStyle}"
+    mc:Ignorable="d">
+    <Grid x:Name="ContentArea" Margin="{StaticResource MediumLeftMargin}">
+        <Grid
+            Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+            <SplitView x:Name="Details" DisplayMode="Inline" IsPaneOpen="False" OpenPaneLength="320" PanePlacement="Right">
+                <SplitView.Pane>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="50" />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Padding="12">
+                            <SymbolIcon x:Name="CloseDetails" Symbol="Cancel" HorizontalAlignment="Right" Tapped="CloseDetails_Tapped" />
+
+                            <TextBlock Text="Details" FontSize="18" VerticalAlignment="Center" Style="{StaticResource DetailSubTitleStyle}" Margin="0,0,0,20"/>
+                            <TextBox x:Name="Title"  Text="{x:Bind ViewModel.Selected.Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontSize="14" PlaceholderText="Title" TextWrapping="Wrap" MaxHeight="75" ScrollViewer.VerticalScrollBarVisibility="Auto" Header="Title"/>
+                            <ComboBox x:Name="Priority" Margin="0,12,0,0" FontSize="14" Header="Priority" SelectedItem="{x:Bind ViewModel.Selected.Priority, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                            <ComboBox x:Name="Board" Margin="0,12,0,0" FontSize="14" Header="Board" ItemsSource="{x:Bind helpers:Boards.GetBoards(), Mode=OneWay}" SelectedValue="{x:Bind ViewModel.Selected.BoardID, Mode=TwoWay}" HorizontalAlignment="Stretch" DisplayMemberPath="Name" SelectedValuePath="ID"/>
+                            <CalendarDatePicker x:Name="CreationDate" PlaceholderText="Created at" Header="Created at" HorizontalAlignment="Stretch" Margin="0,12,0,0" Date="{x:Bind ViewModel.Selected.CreationDate, Mode=TwoWay}" DateFormat = "{}{dayofweek.full}‎, ‎{month.full}‎ ‎{day.integer}‎, ‎{year.full}" IsEnabled="False"/>
+                            <CalendarDatePicker x:Name="DueDate" PlaceholderText="Due date" Header="Due date" HorizontalAlignment="Stretch" Margin="0,12,0,0" Date="{x:Bind ViewModel.Selected.DueDate, Mode=TwoWay}" DateFormat = "{}{dayofweek.full}‎, ‎{month.full}‎ ‎{day.integer}‎, ‎{year.full}"/>
+
+                            <TextBlock Text="Description" FontSize="18" VerticalAlignment="Center" Style="{StaticResource DetailSubTitleStyle}" Margin="0,32,0,00"/>
+                            <components:TaskRichEditBox Text="{x:Bind ViewModel.Selected.Description, Mode=TwoWay}" Height="300" Margin="0,0,0,0"/>
+
+                        </StackPanel>
+
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+
+                            <SymbolIcon x:Name="DeleteTask" Grid.Column="0" Symbol="Delete" Tapped="DeleteTask_Tapped"/>
+                        </Grid>
+
+                    </Grid>
+                </SplitView.Pane>
+
+                <SplitView.Content>
+                    <ScrollViewer>
+                        <Grid Margin="0,0,0,20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition MinWidth="240" Width="*" />
+                                <ColumnDefinition Width="20" />
+                                <ColumnDefinition MinWidth="240" Width="*" />
+                                <ColumnDefinition Width="20" />
+                                <ColumnDefinition MinWidth="240" Width="*" />
+                                <ColumnDefinition Width="20" />
+                                <ColumnDefinition MinWidth="240" Width="*" />
+                                <ColumnDefinition Width="20" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="40" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Text="To Do" FontSize="20" Grid.Column="0" Grid.Row="0" />
+                            <components:SprintTaskListView x:Name="ToDoList" Grid.Column="0" Grid.Row="1" Tasks="{x:Bind ViewModel.ToDoTasks}" ItemDrop="ToDoList_ItemDrop" ItemClick="TaskListView_ItemClick"/>
+
+                            <TextBlock Text="In Progress" FontSize="20" Grid.Column="2" Grid.Row="0" />
+                            <components:SprintTaskListView x:Name="InProgressList" Grid.Column="2" Grid.Row="1" Tasks="{x:Bind ViewModel.InProgressTasks}" ItemDrop="InProgressList_ItemDrop" ItemClick="TaskListView_ItemClick"/>
+
+                            <TextBlock Text="In Review" FontSize="20" Grid.Column="4" Grid.Row="0" />
+                            <components:SprintTaskListView x:Name="InReviewList" Grid.Column="4" Grid.Row="1" Tasks="{x:Bind ViewModel.InReviewTasks}" ItemDrop="InReviewList_ItemDrop" ItemClick="TaskListView_ItemClick"/>
+
+                            <TextBlock Text="Completed" FontSize="20" Grid.Column="6" Grid.Row="0" />
+                            <components:SprintTaskListView x:Name="CompletedList" Grid.Column="6" Grid.Row="1" Tasks="{x:Bind ViewModel.CompletedTasks}" ItemDrop="CompletedList_ItemDrop" ItemClick="TaskListView_ItemClick"/>
+
+                        </Grid>
+                    </ScrollViewer>
+                </SplitView.Content>
+            </SplitView>
+        </Grid>
+    </Grid>
+</Page>

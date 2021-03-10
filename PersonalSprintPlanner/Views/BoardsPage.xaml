@@ -1,0 +1,73 @@
+﻿<Page
+    x:Class="PersonalSprintPlanner.Views.BoardsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:helper="using:PersonalSprintPlanner.Helpers" xmlns:models="using:DataAccessLibrary.Models"
+    Style="{StaticResource PageStyle}"
+    mc:Ignorable="d">
+    <Page.Resources>
+        <helper:CustomColorConverter x:Key="CustomColorConverter" />
+    </Page.Resources>
+    <Grid x:Name="ContentArea" Margin="{StaticResource MediumLeftMargin}">
+        <Grid
+            Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+            <SplitView x:Name="Details" DisplayMode="Inline" IsPaneOpen="False" OpenPaneLength="320" PanePlacement="Right">
+                <SplitView.Pane>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="50" />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Padding="12">
+                            <SymbolIcon x:Name="CloseDetails" Symbol="Cancel" HorizontalAlignment="Right" Tapped="CloseDetails_Tapped" />
+
+                            <TextBlock Text="Details" FontSize="18" VerticalAlignment="Center" Style="{StaticResource DetailSubTitleStyle}" Margin="0,0,0,20"/>
+                            <TextBox x:Name="Name"  Text="{x:Bind ViewModel.Selected.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontSize="14" PlaceholderText="Name" Header="Name"/>
+                            <ComboBox x:Name="Color" Margin="0,12,0,0" FontSize="14" Header="Priority" SelectedItem="{x:Bind ViewModel.Selected.Color, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+               
+                        </StackPanel>
+
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <SymbolIcon x:Name="DeleteBoard" Grid.Column="0" Symbol="Delete" Tapped="DeleteBoard_Tapped"/>
+                        </Grid>
+
+                    </Grid>
+                </SplitView.Pane>
+                <SplitView.Content>
+                    <StackPanel Margin="0,0,24,0">
+                        <RelativePanel Margin="0,20,0,0">
+                            <Button x:Name="NewBoard" RelativePanel.AlignRightWithPanel="True" Click="NewBoard_Click" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                                <StackPanel  Orientation="Horizontal">
+                                    <SymbolIcon Symbol="Add" Margin="0,0,8,0"/>
+                                    <TextBlock>New</TextBlock>
+                                </StackPanel>
+                            </Button>
+                        </RelativePanel>
+                        <ListView x:Name="Boards" ItemsSource="{x:Bind ViewModel.Boards, Mode=OneWay}" Margin="0,12,0,0" IsItemClickEnabled="True" ItemClick="Boards_ItemClick" BorderThickness="1" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumLowBrush}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="models:Board">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="24" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <Ellipse Fill="{x:Bind Color, Converter={StaticResource CustomColorConverter}, Mode=OneWay}" Height="16" Width="16" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{x:Bind Name, Mode=OneWay}" Grid.Column="1" VerticalAlignment="Center"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </StackPanel>
+                </SplitView.Content>
+            </SplitView>
+        </Grid>
+    </Grid>
+</Page>

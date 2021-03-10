@@ -1,0 +1,67 @@
+﻿<UserControl
+    x:Class="PersonalSprintPlanner.Components.TaskListView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:models="using:DataAccessLibrary.Models"
+    xmlns:conv="using:PersonalSprintPlanner.Helpers"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+    <UserControl.Resources>
+        <conv:SymbolConverter x:Key="SymbolConverter" />
+        <conv:PriorityConverter x:Key="PriorityConverter" />
+        <conv:DueDateConverter x:Key="DueDateConverter" />
+    </UserControl.Resources>
+
+    <Grid Background="{ThemeResource SystemControlBackgroundListLowBrush}">
+        <ListView x:Name="List" ItemsSource="{x:Bind Tasks, Mode=TwoWay}" SelectionMode="None" IsItemClickEnabled="True" AllowDrop="True"  CanDragItems="True" CanReorderItems="{x:Bind CanReorderItems}" RightTapped="List_RightTapped" BorderThickness="1" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumLowBrush}">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="Background" Value="{ThemeResource ApplicationPageBackgroundThemeBrush}"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="Padding" Value="0" />
+                </Style>
+            </ListView.ItemContainerStyle>
+
+            <ListView.ItemContainerTransitions>
+                <TransitionCollection/>
+            </ListView.ItemContainerTransitions>
+
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="models:Task">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="4"/>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid x:Name="Priority" Background="{x:Bind Priority, Mode=OneWay, Converter={StaticResource PriorityConverter}}"  Grid.Column="0" CornerRadius="1"/>
+                        <RelativePanel Margin="12" Grid.Column="1">
+                            <TextBlock x:Name="Title" Text="{x:Bind Title, Mode=OneWay}" RelativePanel.AlignVerticalCenterWithPanel="True" FontSize="14"/>
+                            <Border x:Name="Board" RelativePanel.LeftOf="DueDateIcon" Margin="20,0,0,0" Background="{x:Bind conv:Boards.GetBoardColor(BoardID), Mode=OneWay}" CornerRadius="4" Padding="4,2,4,2" RelativePanel.AlignVerticalCenterWithPanel="True">
+                                <TextBlock Text="{x:Bind conv:Boards.GetBoardName(BoardID), Mode=OneWay}" FontSize="12" FontWeight="Medium" />
+                            </Border>
+                            <Viewbox x:Name="DueDateIcon" Margin="20,0,0,0" MaxHeight="16" RelativePanel.LeftOf="DueDate" RelativePanel.AlignVerticalCenterWithPanel="True">
+                                <SymbolIcon Symbol="Flag" />
+                            </Viewbox>
+                            <TextBlock x:Name="DueDate" Text="{x:Bind DueDate, Converter={StaticResource DueDateConverter}}" Margin="8,0,0,0" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignVerticalCenterWithPanel="True" FontSize="14"/>
+                        </RelativePanel>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+
+            <ListView.Resources>
+                <MenuFlyout x:Name="ListContextMenu">
+                    <MenuFlyout.Items>
+                        <MenuFlyoutItem x:Name="ContextItem" Text="{x:Bind ContextItemText}" Click="ContextItem_Click">
+                            <MenuFlyoutItem.Icon>
+                                <SymbolIcon Symbol="{x:Bind ContextItemSymbol, Converter={StaticResource SymbolConverter}}" />
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                    </MenuFlyout.Items>
+                </MenuFlyout>
+            </ListView.Resources>
+        </ListView>
+    </Grid>
+</UserControl>

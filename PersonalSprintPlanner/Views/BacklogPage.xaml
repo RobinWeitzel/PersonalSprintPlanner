@@ -1,0 +1,86 @@
+﻿<Page
+    x:Class="PersonalSprintPlanner.Views.BacklogPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:components="using:PersonalSprintPlanner.Components"
+    xmlns:helpers="using:PersonalSprintPlanner.Helpers"
+    Style="{StaticResource PageStyle}"
+    mc:Ignorable="d">
+    <Grid x:Name="ContentArea" Margin="{StaticResource MediumLeftMargin}">
+        <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+            <SplitView x:Name="Details" DisplayMode="Inline" IsPaneOpen="False" OpenPaneLength="320" PanePlacement="Right">
+                <SplitView.Pane>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="50" />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Padding="12">
+                            <SymbolIcon x:Name="CloseDetails" Symbol="Cancel" HorizontalAlignment="Right" Tapped="CloseDetails_Tapped" />
+
+                            <TextBlock Text="Details" FontSize="18" VerticalAlignment="Center" Style="{StaticResource DetailSubTitleStyle}" Margin="0,0,0,20"/>
+                            <TextBox x:Name="Title"  Text="{x:Bind ViewModel.Selected.Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontSize="14" PlaceholderText="Title" TextWrapping="Wrap" MaxHeight="75" ScrollViewer.VerticalScrollBarVisibility="Auto" Header="Title"/>
+                            <ComboBox x:Name="Priority" Margin="0,12,0,0" FontSize="14" Header="Priority" SelectedItem="{x:Bind ViewModel.Selected.Priority, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                            <ComboBox x:Name="Board" Margin="0,12,0,0" FontSize="14" Header="Board" ItemsSource="{x:Bind helpers:Boards.GetBoards(), Mode=OneWay}" SelectedValue="{x:Bind ViewModel.Selected.BoardID, Mode=TwoWay}" HorizontalAlignment="Stretch" DisplayMemberPath="Name" SelectedValuePath="ID"/>
+                            <CalendarDatePicker x:Name="CreationDate" PlaceholderText="Created at" Header="Created at" HorizontalAlignment="Stretch" Margin="0,12,0,0" Date="{x:Bind ViewModel.Selected.CreationDate, Mode=TwoWay}" DateFormat = "{}{dayofweek.full}‎, ‎{month.full}‎ ‎{day.integer}‎, ‎{year.full}" IsEnabled="False"/>
+                            <CalendarDatePicker x:Name="DueDate" PlaceholderText="Due date" Header="Due date" HorizontalAlignment="Stretch" Margin="0,12,0,0" Date="{x:Bind ViewModel.Selected.DueDate, Mode=TwoWay}" DateFormat = "{}{dayofweek.full}‎, ‎{month.full}‎ ‎{day.integer}‎, ‎{year.full}"/>
+
+                            <TextBlock Text="Description" FontSize="18" VerticalAlignment="Center" Style="{StaticResource DetailSubTitleStyle}" Margin="0,32,0,00"/>
+                            <components:TaskRichEditBox Text="{x:Bind ViewModel.Selected.Description, Mode=TwoWay}" Height="300" Margin="0,0,0,0"/>
+                            
+                        </StackPanel>
+
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <SymbolIcon x:Name="DeleteTask" Grid.Column="0" Symbol="Delete" Tapped="DeleteTask_Tapped"/>
+                        </Grid>
+
+                    </Grid>
+                </SplitView.Pane>
+
+                <SplitView.Content>
+                    <ScrollViewer>
+                        <StackPanel Margin="0,0,24,0" Padding="0,12,0,40">
+                            <TextBlock Text="Filter" FontSize="18" Margin="0,0,0,12"/>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBox x:Name="Search" Header="Search" PlaceholderText="Search" Margin="0,0,40,0" Width="160" Text="{x:Bind ViewModel.SearchTerm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <ComboBox x:Name="BoardFilter" Header="Board" Margin="0,0,40,0" Width="160" ItemsSource="{x:Bind helpers:Boards.GetBoardsAndEmpty(), Mode=OneWay}" SelectedItem="{x:Bind ViewModel.BoardFilter, Mode=TwoWay}" DisplayMemberPath="Name"/>
+                                <ComboBox x:Name="PriorityFilter" Header="Priority" Margin="0,0,40,0" Width="160" SelectedItem="{x:Bind ViewModel.PriorityFilter, Mode=TwoWay}"/>
+                                <ComboBox x:Name="DueDateFilter" Header="Due Date" Margin="0,0,40,0" Width="160" ItemsSource="{x:Bind ViewModel.DueDates, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.DueDateFilter, Mode=TwoWay}"/>
+                            </StackPanel>
+
+                            <RelativePanel Margin="0,20,0,12">
+                                <TextBlock x:Name="SprintText" Text="Sprint" FontSize="18" Margin="0,0,12,0" RelativePanel.AlignVerticalCenterWithPanel="True"/>
+                                <Button x:Name="CreateSprint" Click="CreateSprint_Click" RelativePanel.AlignRightWithPanel="True" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <SymbolIcon Symbol="RepeatAll" Margin="0,0,8,0"/>
+                                        <TextBlock>New Sprint</TextBlock>
+                                    </StackPanel>
+                                </Button>
+                            </RelativePanel>
+                            <components:TaskListView x:Name="Sprint" Tasks="{x:Bind ViewModel.SprintTasks, Mode=TwoWay}" CanReorderItems="False" ItemClick="TaskListView_ItemClick" ContextItemText="Remove from sprint" ContextItemSymbol="Download" ContextItemClick="Sprint_ContextItemClick" />
+                            
+                            <RelativePanel Margin="0,20,0,12">
+                                <TextBlock x:Name="BacklogText" Text="Backlog" FontSize="18" Margin="0,0,12,0" RelativePanel.AlignVerticalCenterWithPanel="True"/>
+                                <Button x:Name="CreateTask" Click="CreateTask_Click" RelativePanel.AlignRightWithPanel="True" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <SymbolIcon Symbol="Add" Margin="0,0,8,0"/>
+                                        <TextBlock>New</TextBlock>
+                                    </StackPanel>
+                                </Button>
+                            </RelativePanel>
+                            <components:TaskListView x:Name="Backlog" Tasks="{x:Bind ViewModel.BacklogTasksFiltered, Mode=TwoWay}" CanReorderItems="True" ItemClick="TaskListView_ItemClick" ContextItemText="Add to sprint" ContextItemSymbol="Upload" ContextItemClick="Backlog_ContextItemClick"  />
+                        </StackPanel>
+                    </ScrollViewer>
+                </SplitView.Content>
+
+            </SplitView>
+        </Grid>
+    </Grid>
+</Page>
