@@ -5,15 +5,16 @@ using Windows.Storage;
 using System.IO;
 using System.Threading.Tasks;
 using System.Linq;
+using DataAccessLibrary.Models;
 
 namespace DataAccessLibrary
 {
     public static class DataAccess
     {
         const string DBName = "PersonalSprintPlanner.db";
-        public async static void InitializeDatabase()
+        public async static Task<List<Board>> InitializeDatabase()
         {
-            await ApplicationData.Current.LocalFolder.CreateFileAsync(DBName, CreationCollisionOption.ReplaceExisting);
+            await ApplicationData.Current.LocalFolder.CreateFileAsync(DBName, CreationCollisionOption.OpenIfExists);
             string dbpath = Path.Combine(ApplicationData.Current.LocalFolder.Path, DBName);
             using (SqliteConnection db =
                new SqliteConnection($"Filename={dbpath}"))
@@ -44,16 +45,21 @@ namespace DataAccessLibrary
                 db.Close();
 
                 List<Models.Board> boards = (await GetBoards()).ToList();
-                Models.Board defaultBoard = boards.Find(b => b.ID == 0);
+                Models.Board defaultBoard = boards.Find(b => b.ID == 1);
 
                 if (defaultBoard == null)
                 {
-                    await AddBoard(new Models.Board
+                    defaultBoard = new Models.Board
                     {
                         Name = "Unassigned",
                         Color = Models.Color.Transparent
-                    });
+                    };
+                    await AddBoard(defaultBoard);
+
+                    boards.Add(defaultBoard);
                 }
+
+                return boards;
             }
         }
         
@@ -231,7 +237,7 @@ namespace DataAccessLibrary
             }
         }
 
-        public static async Task DeleteTask(Models.Task task)
+        public static async System.Threading.Tasks.Task DeleteTask(Models.Task task)
         {
             try
             {
@@ -434,7 +440,7 @@ namespace DataAccessLibrary
 
         }
 
-        public static async Task ClearSprint()
+        public static async System.Threading.Tasks.Task ClearSprint()
         {
             try
             {

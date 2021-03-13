@@ -27,14 +27,12 @@ namespace PersonalSprintPlanner
             // Deferred execution until used. Check https://docs.microsoft.com/dotnet/api/system.lazy-1 for further info on Lazy<T> class.
             _activationService = new Lazy<ActivationService>(CreateActivationService);
 
-            DataAccess.InitializeDatabase();
-
             SeedDatabase();
         }
 
         private async void SeedDatabase()
         {
-            Boards.SetBoards(await DataAccess.GetBoards());
+            Boards.SetBoards(await DataAccess.InitializeDatabase());
         }
 
         protected override async void OnLaunched(LaunchActivatedEventArgs args)
