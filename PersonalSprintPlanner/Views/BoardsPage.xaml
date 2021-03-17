@@ -22,7 +22,9 @@
                         </Grid.RowDefinitions>
 
                         <StackPanel Padding="12">
-                            <SymbolIcon x:Name="CloseDetails" Symbol="Cancel" HorizontalAlignment="Right" Tapped="CloseDetails_Tapped" />
+                            <Border x:Name="CloseDetails" HorizontalAlignment="Right" Tapped="CloseDetails_Tapped">
+                                <SymbolIcon Symbol="Cancel" />
+                            </Border>
 
                             <TextBlock Text="Details" FontSize="18" VerticalAlignment="Center" Style="{StaticResource DetailSubTitleStyle}" Margin="0,0,0,20"/>
                             <TextBox x:Name="Name"  Text="{x:Bind ViewModel.Selected.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontSize="14" PlaceholderText="Name" Header="Name"/>

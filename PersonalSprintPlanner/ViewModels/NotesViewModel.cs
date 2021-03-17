@@ -2,7 +2,8 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-
+using DataAccessLibrary;
+using DataAccessLibrary.Models;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 
 using PersonalSprintPlanner.Core.Models;
@@ -13,34 +14,74 @@ namespace PersonalSprintPlanner.ViewModels
 {
     public class NotesViewModel : Observable
     {
-        private SampleOrder _selected;
+        private Note _selected;
 
-        public SampleOrder Selected
+        public Note Selected
         {
             get { return _selected; }
-            set { Set(ref _selected, value); }
+            set
+            {
+                if (_selected != null)
+                {
+                    SaveSelected();
+                }
+
+                if(_selected != value)
+                {
+                    Set(ref _selected, value);
+                }
+            }
         }
 
-        public ObservableCollection<SampleOrder> SampleItems { get; private set; } = new ObservableCollection<SampleOrder>();
+        public FullyObservableCollection<Note> Notes { get; set; } = new FullyObservableCollection<Note>();
 
         public NotesViewModel()
         {
         }
 
-        public async Task LoadDataAsync(MasterDetailsViewState viewState)
+        public async System.Threading.Tasks.Task LoadDataAsync()
         {
-            SampleItems.Clear();
+            Notes.Clear();
 
-            var data = await SampleDataService.GetMasterDetailDataAsync();
+            var data = await DataAccess.GetNotes();
 
             foreach (var item in data)
             {
-                SampleItems.Add(item);
+                Notes.Add(item);
             }
 
-            if (viewState == MasterDetailsViewState.Both)
+            Notes.ItemPropertyChanged += ItemPropertyChanged;
+        }
+
+        public void ItemPropertyChanged(object sender, ItemPropertyChangedEventArgs args)
+        {
+            Notes[args.CollectionIndex] = Notes[args.CollectionIndex];
+        }
+
+        public async void CreateNote()
+        {
+            Note note = new Note();
+            note.Title = "New note";
+            note.CreationDate = DateTime.Now;
+            note.ID = await DataAccess.AddNote(note);
+
+            Notes.Add(note);
+            Selected = note;
+        }
+
+        public async void DeleteNote()
+        {
+            await DataAccess.DeleteNote(Selected);
+
+            Notes.Remove(Selected);
+            Selected = null;
+        }
+
+        private void SaveSelected()
+        {
+            if (Selected != null)
             {
-                Selected = SampleItems.First();
+                DataAccess.UpdateNote(Selected);
             }
         }
     }

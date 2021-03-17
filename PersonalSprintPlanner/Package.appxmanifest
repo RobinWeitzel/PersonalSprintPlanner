@@ -10,7 +10,7 @@
   <Identity
     Name="0FC0E428-3D71-4AFE-9110-E357ACF758BA"
     Publisher="E=robin.weitzel.rw@gmail.com, CN=&quot;Open Source Developer, Robin Weitzel&quot;, O=Open Source Developer, L=Feldkirch, S=Vorarlberg, C=AT"
-    Version="0.5.3.0" />
+    Version="0.5.4.0" />
 
   <mp:PhoneIdentity PhoneProductId="0FC0E428-3D71-4AFE-9110-E357ACF758BA" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 

@@ -163,9 +163,12 @@
       <DependentUpon>TaskRichEditBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="Helpers\Boards.cs" />
+    <Compile Include="Helpers\SelectionBooleanConverter.cs" />
+    <Compile Include="Helpers\VisibilityConverter.cs" />
     <Compile Include="Helpers\CustomColorConverter.cs" />
     <Compile Include="Helpers\DueDateConverter.cs" />
     <Compile Include="Helpers\EnumToBooleanConverter.cs" />
+    <Compile Include="Helpers\FullyObservableCollection.cs" />
     <Compile Include="Helpers\NavHelper.cs" />
     <Compile Include="Helpers\Observable.cs" />
     <Compile Include="Helpers\PriorityConverter.cs" />
@@ -189,9 +192,6 @@
     </Compile>
     <Compile Include="Views\BoardsPage.xaml.cs">
       <DependentUpon>BoardsPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\NotesDetailControl.xaml.cs">
-      <DependentUpon>NotesDetailControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\NotesPage.xaml.cs">
       <DependentUpon>NotesPage.xaml</DependentUpon>
@@ -250,10 +250,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\BoardsPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Views\NotesDetailControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

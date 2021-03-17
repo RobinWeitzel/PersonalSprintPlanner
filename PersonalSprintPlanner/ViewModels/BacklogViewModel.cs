@@ -119,18 +119,21 @@ namespace PersonalSprintPlanner.ViewModels
 
         private void SaveSelected()
         {
-            DataAccess.UpdateTask(Selected);
-            if (Selected.SprintRelevant)
+            if(Selected != null)
             {
-                int index = SprintTasks.IndexOf(Selected);
-                if (index >= 0)
+                DataAccess.UpdateTask(Selected);
+                if (Selected.SprintRelevant)
                 {
-                    SprintTasks[index] = Selected;
+                    int index = SprintTasks.IndexOf(Selected);
+                    if (index >= 0)
+                    {
+                        SprintTasks[index] = Selected;
+                    }
                 }
-            }
-            else
-            {
-                ApplyFilters();
+                else
+                {
+                    ApplyFilters();
+                }
             }
         }
 
@@ -236,7 +239,7 @@ namespace PersonalSprintPlanner.ViewModels
             {
                 Status = Status.ToDo,
                 SprintRelevant = false,
-                BoardID = 1,
+                BoardID = 0,
                 Priority = Priority.Low,
                 Position = Positioning.Calculate(Positioning.Max(BacklogTasks.LastOrDefault()?.Position, SprintTasks.LastOrDefault()?.Position), null),
                 CreationDate = DateTime.Now
@@ -286,8 +289,11 @@ namespace PersonalSprintPlanner.ViewModels
 
             foreach(Task task in SprintTasks)
             {
-                task.SprintRelevant = false;
-                BacklogTasks.Add(task);
+                if(task.Status != Status.Completed)
+                {
+                    task.SprintRelevant = false;
+                    BacklogTasks.Add(task);
+                }
             }
 
             SprintTasks.Clear();

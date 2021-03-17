@@ -11,7 +11,7 @@ namespace DataAccessLibrary
 {
     public static class DataAccess
     {
-        const string DBName = "PersonalSprintPlanner.db";
+        const string DBName = "PersonalSprintPlanner.txt";
         public async static Task<List<Board>> InitializeDatabase()
         {
             await ApplicationData.Current.LocalFolder.CreateFileAsync(DBName, CreationCollisionOption.OpenIfExists);
@@ -36,7 +36,11 @@ namespace DataAccessLibrary
                 CREATE TABLE IF NOT EXISTS
                     Boards (ID INTEGER  NOT NULL PRIMARY KEY, 
                     Name Text NOT NULL,
-                    Color INTEGER NOT NULL);";
+                    Color INTEGER NOT NULL);
+                CREATE TABLE IF NOT EXISTS
+                    Notes (ID INTEGER  NOT NULL PRIMARY KEY, 
+                    Title Text,
+                    Content Text);";
 
                 SqliteCommand createTable = new SqliteCommand(tableCommand, db);
 
@@ -140,6 +144,72 @@ namespace DataAccessLibrary
                     return id;
                 }
             } catch (Exception eSql)
+            {
+                System.Diagnostics.Debug.WriteLine($"Exception: {eSql.Message} {eSql.InnerException?.Message}");
+
+                return -1;
+            }
+        }
+
+        public static async Task<long> AddNote(Models.Note note)
+        {
+            try
+            {
+                string dbpath = Path.Combine(ApplicationData.Current.LocalFolder.Path, DBName);
+                using (SqliteConnection db =
+                  new SqliteConnection($"Filename={dbpath}"))
+                {
+                    db.Open();
+
+                    SqliteCommand insertCommand = new SqliteCommand();
+                    insertCommand.Connection = db;
+
+                    // Use parameterized query to prevent SQL injection attacks
+                    insertCommand.CommandText = @"INSERT INTO Notes VALUES (NULL, @Title, @Content);";
+                    if (note.Title == null)
+                    {
+                        insertCommand.Parameters.AddWithValue("@Title", DBNull.Value);
+                    }
+                    else
+                    {
+                        insertCommand.Parameters.AddWithValue("@Title", note.Title);
+                    }
+                    if (note.Content == null)
+                    {
+                        insertCommand.Parameters.AddWithValue("@Content", DBNull.Value);
+
+                    }
+                    else
+                    {
+                        insertCommand.Parameters.AddWithValue("@Content", note.Content);
+                    }
+                    
+                    insertCommand.Parameters.AddWithValue("@CreationDate", note.CreationDate);
+
+                    await insertCommand.ExecuteReaderAsync();
+
+                    SqliteCommand selectCommand = new SqliteCommand
+                            ("SELECT last_insert_rowid()", db);
+
+                    SqliteDataReader query = selectCommand.ExecuteReader();
+
+                    long id;
+
+                    if (await query.ReadAsync())
+                    {
+                        id = query.GetInt32(0);
+                    }
+                    else
+                    {
+                        id = -1;
+                    }
+
+                    db.Close();
+
+                    return id;
+                }
+            }
+            catch (Exception eSql)
             {
                 System.Diagnostics.Debug.WriteLine($"Exception: {eSql.Message} {eSql.InnerException?.Message}");
 
@@ -314,6 +384,36 @@ namespace DataAccessLibrary
             }
         }
 
+        public static async Task<bool> DeleteNote(Models.Note note)
+        {
+            try
+            {
+                string dbpath = Path.Combine(ApplicationData.Current.LocalFolder.Path, DBName);
+                using (SqliteConnection db =
+                  new SqliteConnection($"Filename={dbpath}"))
+                {
+                    db.Open();
+
+                    SqliteCommand insertCommand = new SqliteCommand();
+                    insertCommand.Connection = db;
+
+                    // Use parameterized query to prevent SQL injection attacks
+                    insertCommand.CommandText = @"DELETE FROM Notes 
+                        WHERE ID = @ID;";
+
+                    insertCommand.Parameters.AddWithValue("@ID", note.ID);
+
+                    await insertCommand.ExecuteReaderAsync();
+                    return true;
+                }
+            }
+            catch (Exception eSql)
+            {
+                System.Diagnostics.Debug.WriteLine($"Exception: {eSql.Message} {eSql.InnerException?.Message}");
+                return false;
+            }
+        }
+
         public static async void UpdateTask(Models.Task task)
         {
             try
@@ -390,6 +490,52 @@ namespace DataAccessLibrary
             }
         }
 
+        public static async void UpdateNote(Models.Note note)
+        {
+            try
+            {
+                string dbpath = Path.Combine(ApplicationData.Current.LocalFolder.Path, DBName);
+                using (SqliteConnection db =
+                  new SqliteConnection($"Filename={dbpath}"))
+                {
+                    db.Open();
+
+                    SqliteCommand insertCommand = new SqliteCommand();
+                    insertCommand.Connection = db;
+
+                    // Use parameterized query to prevent SQL injection attacks
+                    insertCommand.CommandText = @"UPDATE Notes SET
+                        Title = @Title, 
+                        Content = @Content
+                        WHERE ID = @ID;";
+                    if (note.Title == null)
+                    {
+                        insertCommand.Parameters.AddWithValue("@Title", DBNull.Value);
+                    }
+                    else
+                    {
+                        insertCommand.Parameters.AddWithValue("@Title", note.Title);
+                    }
+                    if (note.Content == null)
+                    {
+                        insertCommand.Parameters.AddWithValue("@Content", DBNull.Value);
+
+                    }
+                    else
+                    {
+                        insertCommand.Parameters.AddWithValue("@Content", note.Content);
+                    }
+                    insertCommand.Parameters.AddWithValue("@ID", note.ID);
+
+                    await insertCommand.ExecuteReaderAsync();
+                }
+            }
+            catch (Exception eSql)
+            {
+                System.Diagnostics.Debug.WriteLine($"Exception: {eSql.Message} {eSql.InnerException?.Message}");
+            }
+        }
+
         public static async Task<long> AddBoard(Models.Board board)
         {
             try
@@ -450,6 +596,14 @@ namespace DataAccessLibrary
                 {
                     db.Open();
 
+                    SqliteCommand deleteCommand = new SqliteCommand();
+                    deleteCommand.Connection = db;
+
+                    deleteCommand.CommandText = @"DELETE Tasks WHERE
+                        Status = @Status AND SprintRelevant = @SprintRelevant;";
+                    deleteCommand.Parameters.AddWithValue("@Status", Status.Completed);
+                    deleteCommand.Parameters.AddWithValue("@SprintRelevant", true);
+
                     SqliteCommand insertCommand = new SqliteCommand();
                     insertCommand.Connection = db;
 
@@ -458,7 +612,10 @@ namespace DataAccessLibrary
                         SprintRelevant = @SprintRelevant;";
                     insertCommand.Parameters.AddWithValue("@SprintRelevant", false);
 
+                    await deleteCommand.ExecuteReaderAsync();
                     await insertCommand.ExecuteReaderAsync();
+
+                    db.Close();
                 }
             }
             catch (Exception eSql)
@@ -532,6 +689,55 @@ namespace DataAccessLibrary
                         };
 
                         entries.Add(board);
+                    }
+
+                    db.Close();
+                }
+            }
+            catch (Exception eSql)
+            {
+                // Your code may benefit from more robust error handling or logging.
+                // This logging is just a reminder that you should handle exceptions when connecting to remote data.
+                System.Diagnostics.Debug.WriteLine($"Exception: {eSql.Message} {eSql.InnerException?.Message}");
+            }
+
+            return entries;
+        }
+
+        public static async Task<IEnumerable<Models.Note>> GetNotes()
+        {
+            string getDataQuery = @"
+            SELECT Notes.ID,
+                Notes.Title,
+                Notes.Content
+            FROM Notes;";
+
+            List<Models.Note> entries = new List<Models.Note>();
+
+            string dbpath = Path.Combine(ApplicationData.Current.LocalFolder.Path, DBName);
+
+            try
+            {
+                using (SqliteConnection db =
+                   new SqliteConnection($"Filename={dbpath}"))
+                {
+                    db.Open();
+
+                    SqliteCommand selectCommand = new SqliteCommand
+                        (getDataQuery, db);
+
+                    SqliteDataReader query = selectCommand.ExecuteReader();
+
+                    while (await query.ReadAsync())
+                    {
+                        Models.Note note = new Models.Note()
+                        {
+                            ID = query.GetInt32(0),
+                            Title = query.IsDBNull(1) ? null : query.GetString(1),
+                            Content = query.IsDBNull(2) ? null : query.GetString(2),
+                        };
+
+                        entries.Add(note);
                     }
 
                     db.Close();

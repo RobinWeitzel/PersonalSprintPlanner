@@ -20,7 +20,9 @@
                         </Grid.RowDefinitions>
 
                         <StackPanel Padding="12">
-                            <SymbolIcon x:Name="CloseDetails" Symbol="Cancel" HorizontalAlignment="Right" Tapped="CloseDetails_Tapped" />
+                            <Border x:Name="CloseDetails" HorizontalAlignment="Right" Tapped="CloseDetails_Tapped">
+                                <SymbolIcon Symbol="Cancel" />
+                            </Border>
 
                             <TextBlock Text="Details" FontSize="18" VerticalAlignment="Center" Style="{StaticResource DetailSubTitleStyle}" Margin="0,0,0,20"/>
                             <TextBox x:Name="Title"  Text="{x:Bind ViewModel.Selected.Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontSize="14" PlaceholderText="Title" TextWrapping="Wrap" MaxHeight="75" ScrollViewer.VerticalScrollBarVisibility="Auto" Header="Title"/>
@@ -38,7 +40,6 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-
 
                             <SymbolIcon x:Name="DeleteTask" Grid.Column="0" Symbol="Delete" Tapped="DeleteTask_Tapped"/>
                         </Grid>

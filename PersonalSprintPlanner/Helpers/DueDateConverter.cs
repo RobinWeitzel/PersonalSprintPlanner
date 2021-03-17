@@ -16,20 +16,20 @@ namespace PersonalSprintPlanner.Helpers
 
             DateTime dt = DateTime.Parse(value.ToString());
 
-            int dueIn = (int)Math.Floor((dt - DateTime.Now).TotalDays);
+            int dueIn = (int)Math.Ceiling((dt - DateTime.Now).TotalDays);
 
-            if(dueIn < 1)
+            if(dueIn < -1)
             {
                 return Math.Abs(dueIn) + " days overdue";
             } else if (dueIn == -1)
             {
-                return Math.Abs(dueIn) + " day overdue";
+                return "yesterday";
             } else if(dueIn == 0)
             {
                 return "today";
             } else if(dueIn == 1)
             {
-                return "1 day";
+                return "tomorrow";
             } else
             {
                 return dueIn + " days";

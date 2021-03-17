@@ -6,101 +6,84 @@
     xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Style="{StaticResource PageStyle}"
-    xmlns:model="using:PersonalSprintPlanner.Core.Models"
     xmlns:views="using:PersonalSprintPlanner.Views"
     xmlns:behaviors="using:PersonalSprintPlanner.Behaviors"
-    behaviors:NavigationViewHeaderBehavior.HeaderMode="Never"
+    xmlns:model="using:DataAccessLibrary.Models"
+    xmlns:components="using:PersonalSprintPlanner.Components"
+    xmlns:conv="using:PersonalSprintPlanner.Helpers"
     mc:Ignorable="d">
-    <Page.Transitions>
-        <TransitionCollection>
-            <NavigationThemeTransition />
-        </TransitionCollection>
-    </Page.Transitions>
-    <Page.Resources>
-        <DataTemplate x:Key="ItemTemplate" x:DataType="model:SampleOrder">
-            <Grid Height="60">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <FontIcon
-                    Grid.Column="0"
-                    VerticalAlignment="Center"
-                    FontSize="32"
-                    Glyph="{x:Bind Symbol}" />
-                <StackPanel
-                    Grid.Column="1"
-                    Margin="{StaticResource SmallLeftMargin}"
-                    VerticalAlignment="Center">
-                    <TextBlock Style="{ThemeResource ListTitleStyle}" Text="{x:Bind Company}" />
-                    <TextBlock Style="{StaticResource ListSubTitleStyle}" Text="{x:Bind Status}" />
-                </StackPanel>
-            </Grid>
-        </DataTemplate>
+    <UserControl.Resources>
+        <conv:VisibilityConverter x:Key="VisibilityConverter" />
+        <conv:SelectionBooleanConverter x:Key="SelectionBooleanConverter" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="260" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
 
-        <DataTemplate x:Key="DetailsTemplate">
-            <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-                <views:NotesDetailControl MasterMenuItem="{Binding}" />
-            </Grid>
-        </DataTemplate>
-
-        <DataTemplate x:Key="NoSelectionContentTemplate">
-            <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <StackPanel Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}">
+            <RelativePanel Margin="8" >
                 <TextBlock
-                    x:Uid="Notes_NoSelection"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Style="{StaticResource SubtitleTextBlockStyle}"
-                    TextAlignment="Center" />
-            </Grid>
-        </DataTemplate>
+                        x:Name="headerText"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource ListTitleStyle}"
+                        RelativePanel.AlignLeftWithPanel="True"
+                        RelativePanel.AlignVerticalCenterWithPanel="True"
+                        Text="Notes"/>
+            </RelativePanel>
+            <ListView x:Name="List" ItemsSource="{x:Bind ViewModel.Notes, Mode=TwoWay}" IsItemClickEnabled="True" ItemClick="List_ItemClick">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="Padding" Value="12" />
+                        <Setter Property="Margin" Value="0" />
+                    </Style>
+                </ListView.ItemContainerStyle>
 
-        <DataTemplate x:Key="MasterHeaderTemplate">
-            <Grid Height="40">
-                <TextBlock
-                    x:Name="headerText"
-                    VerticalAlignment="Center"
-                    Style="{StaticResource ListTitleStyle}"
-                    Text="{Binding}" />
-            </Grid>
-        </DataTemplate>
-        <DataTemplate x:Key="MinimalMasterHeaderTemplate">
-            <Grid Height="40">
-                <TextBlock
-                    x:Name="headerText"
-                    Margin="96,0,0,0"
-                    Text="{Binding}"
-                    VerticalAlignment="Center"
-                    Style="{StaticResource ListTitleStyle}" />
-            </Grid>
-        </DataTemplate>
-    </Page.Resources>
+                <ListView.ItemContainerTransitions>
+                    <TransitionCollection/>
+                </ListView.ItemContainerTransitions>
 
-    <Grid x:Name="ContentArea">
-        <VisualStateManager.VisualStateGroups>
-                <VisualStateGroup>
-                    <VisualState>
-                        <VisualState.StateTriggers>
-                            <!--641 is the default CompactModeThresholdWidth in NavigationView -->
-                            <AdaptiveTrigger MinWindowWidth="641" />
-                        </VisualState.StateTriggers>
-                        <VisualState.Setters>
-                            <Setter Target="MasterDetailsViewControl.MasterHeaderTemplate" Value="{StaticResource MasterHeaderTemplate}" />
-                        </VisualState.Setters>
-                    </VisualState>
-                </VisualStateGroup>
-            </VisualStateManager.VisualStateGroups>
-        <controls:MasterDetailsView
-            x:Name="MasterDetailsViewControl"
-            x:Uid="Notes"
-            BackButtonBehavior="Automatic"
-            Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}"
-            BorderBrush="Transparent"
-            DetailsTemplate="{StaticResource DetailsTemplate}"
-            ItemsSource="{x:Bind ViewModel.SampleItems}"
-            ItemTemplate="{StaticResource ItemTemplate}"
-            MasterHeaderTemplate="{StaticResource MinimalMasterHeaderTemplate}"
-            NoSelectionContentTemplate="{StaticResource NoSelectionContentTemplate}"
-            SelectedItem="{x:Bind ViewModel.Selected, Mode=TwoWay}" />
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="model:Note">
+                        <Grid>
+                            <TextBlock Text="{x:Bind Title, Mode=TwoWay}" />
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </StackPanel>
+
+        <StackPanel Grid.Column="1" Margin="16">
+            <RelativePanel>
+                <Button x:Name="Add" Click="Add_Click" RelativePanel.LeftOf="Delete" Margin="0,0,12,0">
+                    <StackPanel Orientation="Horizontal">
+                        <Viewbox MaxHeight="16" MaxWidth="16"  Margin="0,0,8,0">
+                            <SymbolIcon Symbol="Add" />
+                        </Viewbox>
+                        <TextBlock>Add Note</TextBlock>
+                    </StackPanel>
+                </Button>
+
+                <Button x:Name="Delete" Click="Delete_Click" RelativePanel.AlignRightWithPanel="True" IsEnabled="{x:Bind ViewModel.Selected, Mode=OneWay, Converter={StaticResource SelectionBooleanConverter}}">
+                    <StackPanel Orientation="Horizontal">
+                        <Viewbox MaxHeight="16" MaxWidth="16"  Margin="0,0,8,0">
+                            <SymbolIcon Symbol="Delete" />
+                        </Viewbox>
+                        <TextBlock>Delete Note</TextBlock>
+                    </StackPanel>
+                </Button>
+            </RelativePanel>
+
+            <StackPanel Visibility="{x:Bind ViewModel.Selected, Mode=OneWay, Converter={StaticResource VisibilityConverter}}" >
+                <TextBlock Text="Details" FontSize="18" VerticalAlignment="Center" Style="{StaticResource DetailSubTitleStyle}" Margin="0,0,0,12"/>
+                <TextBox HorizontalAlignment="Stretch" Header="Title" Text="{x:Bind ViewModel.Selected.Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <CalendarDatePicker x:Name="CreationDate" PlaceholderText="Created at" Header="Created at" HorizontalAlignment="Stretch" Margin="0,12,0,0" Date="{x:Bind ViewModel.Selected.CreationDate, Mode=TwoWay}" DateFormat = "{}{dayofweek.full}‎, ‎{month.full}‎ ‎{day.integer}‎, ‎{year.full}" IsEnabled="False"/>
+
+                <TextBlock Text="Details" FontSize="18" VerticalAlignment="Center" Style="{StaticResource DetailSubTitleStyle}" Margin="0,20,0,0"/>
+                <components:TaskRichEditBox Text="{x:Bind ViewModel.Selected.Content, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="400"/>
+            </StackPanel>
+        </StackPanel>
     </Grid>
 </Page>
